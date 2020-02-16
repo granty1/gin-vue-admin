@@ -1,6 +1,7 @@
 <template>
-  <el-container class="layout-cont">
-    <el-container>
+  <el-container class="layout-cont" >
+    <el-container :class="[isSider?'openside':'hideside',isMobile ? 'mobile': '']">
+      <el-row :class="[isShadowBg?'shadowBg':'']" @click.native="changeShadow()"></el-row>  
       <el-aside class="main-cont main-left">
         <Aside class="aside" />
       </el-aside>
@@ -56,21 +57,42 @@ export default {
   name: 'Layout',
   data() {
     return {
-      isCollapse: false
+      isCollapse: false,
+      isSider: true,
+      isMobile: false,
+      isShadowBg: false
     }
   },
   components: {
     Aside
   },
+  created(){
+     let screenWidth = document.body.clientWidth
+     if(screenWidth<1000){
+        this.isMobile = true
+        this.isSider = false
+        this.isCollapse = !this.isCollapse
+      }else{
+        this.isMobile = false
+      }
+  },
   methods: {
     ...mapActions('user', ['LoginOut']),
     totalCollapse() {
-      this.isCollapse = !this.isCollapse
-      this.$bus.emit('totalCollapse')
+       this.isCollapse = !this.isCollapse
+       this.isSider = !this.isCollapse
+       this.isShadowBg = !this.isCollapse
+       this.$bus.emit('totalCollapse')
     },
     toPerson() {
       this.$router.push({ name: 'person' })
+    },
+    changeShadow(){
+      this.isShadowBg = !this.isShadowBg
+      this.isSider = !!this.isCollapse
+      this.totalCollapse()
     }
+   
   },
   computed: {
     ...mapGetters('user', ['userInfo']),
@@ -80,6 +102,29 @@ export default {
     matched() {
       return this.$route.matched
     }
+  },
+  mounted() {
+     window.onresize = () => {
+          return (() => {
+             let screenWidth = document.body.clientWidth
+            if(!this.screenWidth && this.isSider){
+                 if(screenWidth < 1000){
+                   this.isMobile = true
+                   this.isSider = false
+                   this.isCollapse = true
+                   this.$bus.emit('collapse',this.isCollapse)
+                 }
+            }else {
+                if(screenWidth < 1000){
+                this.isMobile = true
+                this.isSider = false
+                this.isCollapse = true
+              } else {
+                this.isMobile = false
+              }
+            }
+          })()
+      }
   }
 }
 </script>
@@ -122,14 +167,14 @@ $mainHight: 100vh;
   .main-cont {
     .breadcrumb {
       line-height: 24px;
-      padding: 6px;
-      border-bottom: 1px solid #eee;
+      // padding: 6px;
+      // border-bottom: 1px solid #eee;
       margin-bottom: 6px;
     }
     &.el-main {
       overflow: auto;
-      padding: 0px 10px;
-      background: #fff;
+      // padding: 0px 10px;
+      // background: #fff;
     }
     height: $mainHight !important;
     overflow: visible;
@@ -152,7 +197,7 @@ $mainHight: 100vh;
     }
     .aside {
       overflow: auto;
-      background: #fff;
+      // background: #fff;
       &::-webkit-scrollbar {
         display: none;
       }

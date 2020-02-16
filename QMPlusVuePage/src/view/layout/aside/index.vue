@@ -8,7 +8,6 @@
         :default-active="active"
         @select="selectMenuItem"
         active-text-color="#fff"
-        background-color="#0F3D5F"
         text-color="rgb(191, 203, 217)"
         unique-opened
       >
@@ -39,18 +38,28 @@ export default {
   },
   computed: {
     ...mapGetters('router', ['asyncRouters'])
+
   },
   components: {
     AsideComponent
   },
   created() {
     this.active = this.$route.name
+    let screenWidth = document.body.clientWidth
+     if(screenWidth<1000){
+       this.isCollapse = !this.isCollapse
+      }
     this.$bus.on('totalCollapse', () => {
       this.isCollapse = !this.isCollapse
     })
+     this.$bus.on('collapse', (item) => {
+      this.isCollapse = item
+    })
+
   },
   beforeDestroy() {
     this.$bus.off('totalCollapse')
+    this.$bus.off('collapse')
   }
 }
 </script>
